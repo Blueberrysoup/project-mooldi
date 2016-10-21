@@ -34,4 +34,7 @@ public class Player {
 		this.completed = completed;
 	}
 	
+	public void increaseCompleted() {
+		completed++;
+	}
 }

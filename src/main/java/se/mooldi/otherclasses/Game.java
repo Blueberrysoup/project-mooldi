@@ -6,8 +6,8 @@ public class Game {
 	
 	private String gameType = "";
 	int[][] resultArr = new int[13][13];
-	final int EASY = 3;
-	final int HARD = 10;
+	final int EASY = 2;  //TODO
+	final int HARD = 1;	 //TODO
 	Random rand = new Random();
 	Integer currX = 0;
 	Integer currY = 0;
@@ -74,8 +74,20 @@ public class Game {
 		return result;
 	}
 	
+	public boolean isCleared(){
+		return (resultArr[currX][currY] == 0);
+	}
+
+	public void startGame(){
+		
+	}
+
 	public void saveGame(){
 		
+	}
+	
+	public int[][] getResultArr(){
+		return resultArr;
 	}
 	
 }

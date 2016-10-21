@@ -14,8 +14,12 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import se.mooldi.otherclasses.FileHandler;
 import se.mooldi.otherclasses.Game;
 import se.mooldi.otherclasses.Player;
+import javax.swing.JProgressBar;
+import javax.swing.UIManager;
+import javax.swing.JLayeredPane;
 
 public class MainFrame {
 
@@ -28,14 +32,15 @@ public class MainFrame {
 	private JLabel lblHejNamn;
 	private Player player = new Player();
 	private Game game = new Game();
+	private FileHandler fileHandler = new FileHandler();
 	private JButton btnSluta;
 	private JLabel lblXTalet;
 	private JTextField textFieldSvar;
 	private JLabel labelCurrPoints;
 	private JLabel labelCompleted;
-	private JButton btnNstaTal;
-	private JLabel labelResultCorrect;
+	private JButton btnOKnext;
 	private JLabel labelResultError;
+	private JProgressBar progressBar;
 	
 	/**
 	 * Launch the application.
@@ -76,7 +81,7 @@ public class MainFrame {
 		frmMooldi.getContentPane().add(startPage, "name_23428416361482");
 		startPage.setLayout(null);
 		
-		multiPage.setBackground(Color.ORANGE);
+		multiPage.setBackground(Color.BLUE);
 		frmMooldi.getContentPane().add(multiPage, "name_23490729527832");
 		multiPage.setLayout(null);
 		
@@ -128,21 +133,29 @@ public class MainFrame {
 	public void createMultiPageGUI(){
 		//Labels - text fields
 		lblHejNamn = new JLabel();
-		lblHejNamn.setBounds(41, 43, 315, 15);
+		lblHejNamn.setForeground(Color.LIGHT_GRAY);
+		lblHejNamn.setText("Hej Carina!");
+		lblHejNamn.setFont(new Font("Dialog", Font.PLAIN, 55));
+		lblHejNamn.setBounds(41, 43, 633, 79);
 		multiPage.add(lblHejNamn);
 		
-		labelCurrPoints = new JLabel("0");
-		labelCurrPoints.setBounds(75, 410, 500, 15);
+		JLayeredPane layeredPane = new JLayeredPane();
+		layeredPane.setBounds(0, 0, 1, 1);
+		multiPage.add(layeredPane);
+		
+		labelCurrPoints = new JLabel("");
+		labelCurrPoints.setHorizontalAlignment(SwingConstants.CENTER);
+		labelCurrPoints.setBounds(279, 333, 188, 15);
 		multiPage.add(labelCurrPoints);		
 
 		labelCompleted = new JLabel("0");
-		labelCompleted.setBounds(75, 445, 500, 15);
+		labelCompleted.setBounds(70, 410, 500, 15);
 		multiPage.add(labelCompleted);
 
 		lblXTalet = new JLabel();
 		lblXTalet.setHorizontalAlignment(SwingConstants.CENTER);
 		lblXTalet.setFont(new Font("Dialog", Font.BOLD, 32));
-		lblXTalet.setBounds(288, 137, 133, 79);
+		lblXTalet.setBounds(306, 168, 133, 79);
 		multiPage.add(lblXTalet);
 		
 		textFieldSvar = new JTextField();
@@ -151,50 +164,64 @@ public class MainFrame {
 				onAnswering();
 			}
 		});
-		textFieldSvar.setBounds(298, 210, 138, 36);
+		textFieldSvar.setBounds(301, 256, 138, 36);
 		multiPage.add(textFieldSvar);
 		textFieldSvar.setColumns(10);
-		
-		labelResultCorrect = new JLabel("RÄTT SVAR!!");
-		labelResultCorrect.setFont(new Font("Dialog", Font.BOLD, 32));
-		labelResultCorrect.setHorizontalAlignment(SwingConstants.CENTER);
-		labelResultCorrect.setBounds(130, 287, 509, 40);
-		multiPage.add(labelResultCorrect);
-		
+				
 		labelResultError = new JLabel("Tyvärr var det fel svar - försök igen!");
+		labelResultError.setFont(new Font("Dialog", Font.BOLD | Font.ITALIC, 18));
+		labelResultError.setForeground(Color.RED);
 		labelResultError.setHorizontalAlignment(SwingConstants.CENTER);
-		labelResultError.setBounds(120, 275, 509, 15);
+		labelResultError.setBounds(122, 304, 509, 34);
 		multiPage.add(labelResultError);
 
 		//Button
 		btnSluta = new JButton("Sluta spela och spara poängen");
-		btnSluta.setBounds(420, 496, 255, 25);
+		btnSluta.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				saveGame();
+			}
+		});
+		btnSluta.setBounds(419, 440, 255, 25);
 		multiPage.add(btnSluta);
 		
-		btnNstaTal = new JButton("Nästa tal");
-		btnNstaTal.addActionListener(new ActionListener() {
+		btnOKnext = new JButton("OK");
+		btnOKnext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				runGame();
 			}
 		});
-		btnNstaTal.setBounds(512, 215, 117, 25);
-		multiPage.add(btnNstaTal);
+		btnOKnext.setBounds(468, 261, 117, 25);
+		multiPage.add(btnOKnext);
 		
-		
+		//Progressbar
+		progressBar = new JProgressBar();
+		progressBar.setMaximum(156);
+		progressBar.setBounds(70, 437, 148, 14);
+		multiPage.add(progressBar);
 	}
 	
 	public void onAnswering(){
-		if (game.checkAnswer(Integer.parseInt(textFieldSvar.getText())) == true){
-				player.increasePoints();
-				labelResultCorrect.setVisible(true);
-				labelCurrPoints.setText("Du har haft " + player.getPoints() + " rätta svar den här spelomgången.");				
-		} else {
-			labelResultError.setVisible(true);
+		try{
+			if (game.checkAnswer(Integer.parseInt(textFieldSvar.getText())) == true){
+					player.increasePoints();
+					if (game.isCleared()){
+						player.increaseCompleted();
+						labelCompleted.setText("Du har klarat av " + player.getCompleted() + " av 156 tal.");
+						progressBar.setValue(player.getCompleted());
+					}
+					labelCurrPoints.setText("ANTAL RÄTT: " + player.getPoints());	
+					runGame();
+			} else {
+				textFieldSvar.setText("");
+				labelResultError.setVisible(true);
+			}
+		} catch (NumberFormatException e){
+			e.getMessage();
 		}
 	}
 	
 	public void runGame(){
-		labelResultCorrect.setVisible(false);
 		labelResultError.setVisible(false);
 		textFieldSvar.setText("");
 		lblXTalet.setText(game.runGame());
@@ -202,11 +229,13 @@ public class MainFrame {
 	
 	public void onClickMulti(){
 		player.setName(textFieldName.getText());
+		fileHandler.startGame(player, game);
+		
 		game.setGameType("Mult");
 		game.newMultArray();
 		
 		lblHejNamn.setText("Hej " + textFieldName.getText() + "!");
-		labelCurrPoints.setText("Du har haft " + player.getPoints() + " rätta svar den här spelomgången.");
+		labelCurrPoints.setText("ANTAL RÄTT: " + player.getPoints());
 		labelCompleted.setText("Du har klarat av " + player.getCompleted() + " av 156 tal.");
 		
 		//createMultiPageGUI();     //TODO - flytta från konstruktorn
@@ -214,5 +243,11 @@ public class MainFrame {
 		multiPage.setVisible(true);
 		
 		runGame();
+	}
+
+	public void saveGame(){
+		fileHandler.saveGameToFile(player, game);
+		//dispose();
+		System.exit(0);
 	}
 }
